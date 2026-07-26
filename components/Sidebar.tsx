@@ -10,6 +10,7 @@ import {
   PenSquare,
   Gem,
   Users,
+  Compass,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/content", label: "Content", icon: PenSquare },
   { href: "/offers", label: "Offers", icon: Gem },
   { href: "/leads", label: "Leads", icon: Users },
+  { href: "/principles", label: "Principles", icon: Compass },
 ];
 
 export default function Sidebar() {
@@ -33,7 +35,8 @@ export default function Sidebar() {
       </div>
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+          const active =
+            href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
           return (
             <Link
               key={href}

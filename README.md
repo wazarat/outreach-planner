@@ -14,6 +14,16 @@ A personal outreach, content and offer tracking tool for [CanHav](https://www.ca
 | `/content` Content Tracker | X + LinkedIn, Company + Personal accounts. Every piece has a Hook / Retain / Reward plan and is flagged Give or Take — the app tracks your give/take ratio overall and per slice |
 | `/offers` Offers | Every offer scored 1-10 on Dream Outcome, Perceived Likelihood, Time Delay and Sacrifice. Value score = (Dream × Likelihood) ÷ (Delay × Sacrifice), with a trend chart over time |
 | `/leads` Leads | Live sync from Instantly.ai campaigns. Enrich each lead with "came in for", potential value and notes (manual fields survive re-syncs) |
+| `/principles` Principles | The eight operating principles behind every outreach, each with its own quote, trackers and reminders. Principles 1–4 are live (see below); 5–8 come next |
+
+### The Eight Principles (1–4 implemented)
+
+| Principle | What you track |
+| --- | --- |
+| 1 — Demand & Supply | People imported from your outreach lists who really value what you offer (value level from normal to really high, how much they value it, internal champion, notes) plus a points tracker for building your own loyal marketplace |
+| 2 — My People | Market-building moves (with the problem you're solving that others can't, and who you talked to for the idea), a "saying no" tracker, "famous for a few" metric notes linked to your content, and the 7-11-4 trackers (7 hours of content, 11 interaction points, 4 locations — with High/Medium/Low priority, no caps) |
+| 3 — Market Creation | Content pieces picked up as market signals (tagged Small / Medium / Large with notes) and market positioning notes under Innovation, Relationships, Convenience and Price — each with its own categories |
+| 4 — Right Conditions | The Principle 3 signals worked through a three-part conditions checklist (demand/supply tension transparency, create my own conditions, line out the door) and a champions list built from your reach-out contacts (testimonial, potential referral, product refinement) |
 
 ## Setup
 
@@ -66,11 +76,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Yes | Service account email from the JSON key |
 | `GOOGLE_PRIVATE_KEY` | Yes | Private key from the JSON key (quoted, `\n`-escaped) |
 | `SHEETS_SPREADSHEET_ID` | Yes | Default spreadsheet for all modules |
-| `COLD_SPREADSHEET_ID` … `LEADS_SPREADSHEET_ID` | No | Per-module spreadsheet overrides |
-| `COLD_SHEET_TAB` … `LEADS_SHEET_TAB` | No | Per-module tab-name overrides |
+| `COLD_SPREADSHEET_ID` … `P4_CHAMPIONS_SPREADSHEET_ID` | No | Per-module spreadsheet overrides (see `.env.example` for the full list) |
+| `COLD_SHEET_TAB` … `P4_CHAMPIONS_SHEET_TAB` | No | Per-module tab-name overrides (see `.env.example` for the full list) |
 | `INSTANTLY_API_KEY` | For leads | Instantly.ai API v2 key |
 
 ## Roadmap
 
-- Eight-principles tracking mechanism (next iteration)
+- Principles 5–8 (Principles 1–4 shipped)
 - Deeper integration with the canhav-prod platform
