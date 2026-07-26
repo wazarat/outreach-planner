@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendRow, listRows, newId, updateRow } from "@/lib/sheets";
+import { appendRow, deleteRow, listRows, newId, updateRow } from "@/lib/db";
 import { errorResponse, notConfiguredResponse, todayISO } from "@/lib/api-helpers";
 import { computeValueScore } from "@/lib/types";
 
@@ -76,6 +76,20 @@ export async function PATCH(req: NextRequest) {
       });
     }
     return NextResponse.json({ row });
+  } catch (err) {
+    return errorResponse(err);
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const notConfigured = notConfiguredResponse();
+  if (notConfigured) return notConfigured;
+  try {
+    const { id } = await req.json();
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const deleted = await deleteRow("offers", id);
+    if (!deleted) return NextResponse.json({ error: "Row not found" }, { status: 404 });
+    return NextResponse.json({ deleted: true });
   } catch (err) {
     return errorResponse(err);
   }

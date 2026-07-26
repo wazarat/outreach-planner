@@ -11,7 +11,7 @@ export default function SetupNotice({ message }: { message: string }) {
         <p className="mt-1 text-sm leading-relaxed text-slate-400">{message}</p>
         <p className="mt-2 text-sm text-slate-500">
           See the <span className="font-mono text-slate-400">README.md</span> for the step-by-step
-          Google Sheets and Instantly setup.
+          Neon Postgres and Instantly setup.
         </p>
       </div>
     </div>

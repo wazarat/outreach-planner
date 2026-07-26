@@ -69,5 +69,24 @@ export function useSheet<T extends { id: string }>(url: string) {
     [url]
   );
 
-  return { rows, loading, setupError, error, setError, add, patch, reload: load };
+  const remove = useCallback(
+    async (id: string): Promise<boolean> => {
+      setError(null);
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Delete failed");
+        return false;
+      }
+      setRows((prev) => prev.filter((row) => row.id !== id));
+      return true;
+    },
+    [url]
+  );
+
+  return { rows, loading, setupError, error, setError, add, patch, remove, reload: load };
 }

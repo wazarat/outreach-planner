@@ -8,6 +8,7 @@ import MetricCard from "@/components/MetricCard";
 import OutreachPicker, { PickableContact } from "@/components/OutreachPicker";
 import PrincipleHeader from "@/components/PrincipleHeader";
 import QuoteBlock from "@/components/QuoteBlock";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import TierBadge from "@/components/TierBadge";
 import { useSheet } from "@/lib/use-sheet";
@@ -48,6 +49,7 @@ export default function PrincipleFourPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [step, setStep] = useState<"pick" | "details">("pick");
   const [form, setForm] = useState({ ...EMPTY_CHAMPION });
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const fullyConditioned = useMemo(
@@ -58,7 +60,23 @@ export default function PrincipleFourPage() {
 
   function openImport() {
     setForm({ ...EMPTY_CHAMPION });
+    setEditingId(null);
     setStep("pick");
+    setModalOpen(true);
+  }
+
+  function openEditChampion(row: ChampionRecord) {
+    setForm({
+      outreachId: row.outreachId ?? "",
+      name: row.name ?? "",
+      email: row.email ?? "",
+      company: row.company ?? "",
+      role: row.role ?? "",
+      championType: row.championType || "Testimonial",
+      notes: row.notes ?? "",
+    });
+    setEditingId(row.id);
+    setStep("details");
     setModalOpen(true);
   }
 
@@ -77,8 +95,11 @@ export default function PrincipleFourPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const ok = await champions.add(form);
-      if (ok) setModalOpen(false);
+      const ok = editingId ? await champions.patch(editingId, form) : await champions.add(form);
+      if (ok) {
+        setModalOpen(false);
+        setEditingId(null);
+      }
     } finally {
       setSaving(false);
     }
@@ -136,7 +157,7 @@ export default function PrincipleFourPage() {
         </div>
 
         {signals.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : signals.rows.length === 0 ? (
           <div className="card py-10 text-center text-sm text-slate-500">
             No signals yet — add them from your content in Principle 3, then create the conditions
@@ -197,7 +218,7 @@ export default function PrincipleFourPage() {
         </div>
 
         {champions.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : champions.rows.length === 0 ? (
           <div className="card py-10 text-center text-sm text-slate-500">
             No champions yet. Pull in the people most likely to fight for you.
@@ -213,6 +234,7 @@ export default function PrincipleFourPage() {
                   <th className="th">Role</th>
                   <th className="th">Champion Type</th>
                   <th className="th">Notes</th>
+                  <th className="th"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-700/60">
@@ -239,6 +261,12 @@ export default function PrincipleFourPage() {
                       </select>
                     </td>
                     <td className="td max-w-[200px] text-slate-400">{row.notes || "—"}</td>
+                    <td className="td">
+                      <RowActions
+                        onEdit={() => openEditChampion(row)}
+                        onDelete={() => champions.remove(row.id)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -249,9 +277,18 @@ export default function PrincipleFourPage() {
 
       {/* ---- Champion modal ---- */}
       <Modal
-        title={step === "pick" ? "Pick from your reach-out lists" : "What kind of champion?"}
+        title={
+          editingId
+            ? "Edit champion"
+            : step === "pick"
+              ? "Pick from your reach-out lists"
+              : "What kind of champion?"
+        }
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingId(null);
+        }}
       >
         {step === "pick" ? (
           <>
@@ -326,11 +363,15 @@ export default function PrincipleFourPage() {
               />
             </div>
             <div className="flex justify-between gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setStep("pick")}>
-                Back
-              </button>
+              {editingId ? (
+                <span />
+              ) : (
+                <button type="button" className="btn-ghost" onClick={() => setStep("pick")}>
+                  Back
+                </button>
+              )}
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Saving…" : "Save to sheet"}
+                {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
               </button>
             </div>
           </form>

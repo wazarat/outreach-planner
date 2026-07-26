@@ -5,6 +5,7 @@ import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import Modal from "@/components/Modal";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
 import TrendChart from "@/components/TrendChart";
@@ -57,6 +58,7 @@ export default function OffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
 
   const load = useCallback(async () => {
@@ -95,27 +97,66 @@ export default function OffersPage() {
     setRows((prev) => prev.map((row) => (row.id === id ? (data.row as OfferRecord) : row)));
   }
 
-  async function submitNew(e: React.FormEvent) {
+  async function submitForm(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
       const res = await fetch("/api/offers", {
-        method: "POST",
+        method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Save failed");
         return;
       }
-      setRows((prev) => [...prev, data.row as OfferRecord]);
-      setForm({ ...EMPTY_FORM });
-      setModalOpen(false);
+      const saved = data.row as OfferRecord;
+      setRows((prev) =>
+        editingId ? prev.map((row) => (row.id === editingId ? saved : row)) : [...prev, saved]
+      );
+      closeModal();
     } finally {
       setSaving(false);
     }
+  }
+
+  function openEdit(row: OfferRecord) {
+    setEditingId(row.id);
+    setForm({
+      name: row.name ?? "",
+      date: row.date ?? "",
+      madeTo: row.madeTo ?? "",
+      outcome: row.outcome || "Pending",
+      dreamOutcome: Number(row.dreamOutcome) || 5,
+      likelihood: Number(row.likelihood) || 5,
+      timeDelay: Number(row.timeDelay) || 5,
+      sacrifice: Number(row.sacrifice) || 5,
+      notes: row.notes ?? "",
+    });
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setEditingId(null);
+    setForm({ ...EMPTY_FORM });
+  }
+
+  async function deleteRow(id: string) {
+    setError(null);
+    const res = await fetch("/api/offers", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Delete failed");
+      return;
+    }
+    setRows((prev) => prev.filter((row) => row.id !== id));
   }
 
   if (setupError) {
@@ -198,18 +239,19 @@ export default function OffersPage() {
               <th className="th">Sacrifice</th>
               <th className="th">Value score</th>
               <th className="th">Outcome</th>
+              <th className="th"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={9}>
-                  Loading from Google Sheets…
+                <td className="td py-10 text-center text-slate-500" colSpan={10}>
+                  Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={9}>
+                <td className="td py-10 text-center text-slate-500" colSpan={10}>
                   No offers logged yet. Hit “Log offer” to add your first one.
                 </td>
               </tr>
@@ -240,6 +282,9 @@ export default function OffersPage() {
                       ))}
                     </select>
                   </td>
+                  <td className="td">
+                    <RowActions onEdit={() => openEdit(row)} onDelete={() => deleteRow(row.id)} />
+                  </td>
                 </tr>
               ))
             )}
@@ -247,8 +292,12 @@ export default function OffersPage() {
         </table>
       </div>
 
-      <Modal title="Log an offer" open={modalOpen} onClose={() => setModalOpen(false)}>
-        <form onSubmit={submitNew} className="space-y-4">
+      <Modal
+        title={editingId ? "Edit offer" : "Log an offer"}
+        open={modalOpen}
+        onClose={closeModal}
+      >
+        <form onSubmit={submitForm} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label">Offer name</label>
@@ -332,11 +381,11 @@ export default function OffersPage() {
           </div>
 
           <div className="flex justify-end gap-3">
-            <button type="button" className="btn-ghost" onClick={() => setModalOpen(false)}>
+            <button type="button" className="btn-ghost" onClick={closeModal}>
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save to sheet"}
+              {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
             </button>
           </div>
         </form>

@@ -2,7 +2,7 @@
 
 A personal outreach, content and offer tracking tool for [CanHav](https://www.canhav.co) and personal branding in DeFi, blockchain finance and FinTech.
 
-**Google Sheets is the database.** Every module reads and writes rows in your own spreadsheet, so you can work in the app or directly in Sheets — both stay in sync.
+**Neon Postgres is the database.** Every module reads and writes rows in your own Neon project, and everything can be added, edited and deleted directly in the app.
 
 ## Modules
 
@@ -34,25 +34,19 @@ npm install
 cp .env.example .env.local
 ```
 
-### 2. Google Sheets (the database)
+### 2. Neon Postgres (the database)
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com) and create (or pick) a project.
-2. Enable the **Google Sheets API**: APIs & Services → Library → search "Google Sheets API" → Enable.
-3. Create a **service account**: APIs & Services → Credentials → Create Credentials → Service account. No roles needed.
-4. Open the service account → Keys → Add key → **JSON**. Download the key file.
-5. From the JSON file, copy into `.env.local`:
-   - `client_email` → `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `private_key` → `GOOGLE_PRIVATE_KEY` (keep it quoted, with the `\n` escapes)
-6. Create a Google Sheet (any name). Copy the long ID from its URL (`docs.google.com/spreadsheets/d/<THIS>/edit`) into `SHEETS_SPREADSHEET_ID`.
-7. **Share the sheet** with the service account email (Editor access) — this is the step people forget.
+1. Create a project at [console.neon.tech](https://console.neon.tech) (free tier is plenty).
+2. Copy the **pooled connection string** from the project's Connection Details.
+3. Put it in `.env.local` as `DATABASE_URL`.
 
-Then create all tabs, headers and checkboxes automatically:
+Then create all tables automatically:
 
 ```bash
-npm run bootstrap:sheets
+npm run bootstrap:db
 ```
 
-Want separate spreadsheets per module? Set the optional `COLD_SPREADSHEET_ID`, `WARM_SPREADSHEET_ID`, etc. in `.env.local` (share each with the service account) and re-run the bootstrap.
+The script is idempotent — re-run it any time a new module is added to `lib/config.ts` and it will create the missing tables and columns.
 
 ### 3. Instantly.ai (for the Leads module)
 
@@ -73,11 +67,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Yes | Service account email from the JSON key |
-| `GOOGLE_PRIVATE_KEY` | Yes | Private key from the JSON key (quoted, `\n`-escaped) |
-| `SHEETS_SPREADSHEET_ID` | Yes | Default spreadsheet for all modules |
-| `COLD_SPREADSHEET_ID` … `P4_CHAMPIONS_SPREADSHEET_ID` | No | Per-module spreadsheet overrides (see `.env.example` for the full list) |
-| `COLD_SHEET_TAB` … `P4_CHAMPIONS_SHEET_TAB` | No | Per-module tab-name overrides (see `.env.example` for the full list) |
+| `DATABASE_URL` | Yes | Neon Postgres connection string (pooled) |
 | `INSTANTLY_API_KEY` | For leads | Instantly.ai API v2 key |
 
 ## Roadmap

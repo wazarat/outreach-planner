@@ -6,6 +6,7 @@ import { Plus, Repeat } from "lucide-react";
 import Modal from "./Modal";
 import MetricCard from "./MetricCard";
 import PageHeader from "./PageHeader";
+import RowActions from "./RowActions";
 import SetupNotice from "./SetupNotice";
 import { computeOutreachMetrics } from "@/lib/metrics";
 import {
@@ -73,6 +74,7 @@ export default function OutreachBoard({
   const [methodFilter, setMethodFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
 
   const items = useMemo(() => checklistItems(type), [type]);
@@ -128,27 +130,68 @@ export default function OutreachBoard({
     setRows((prev) => prev.map((row) => (row.id === id ? (data.row as OutreachRecord) : row)));
   }
 
-  async function submitNew(e: React.FormEvent) {
+  async function submitForm(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
       const res = await fetch(`/api/outreach/${type}`, {
-        method: "POST",
+        method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Save failed");
         return;
       }
-      setRows((prev) => [...prev, data.row as OutreachRecord]);
-      setForm({ ...EMPTY_FORM });
-      setModalOpen(false);
+      const saved = data.row as OutreachRecord;
+      setRows((prev) =>
+        editingId ? prev.map((row) => (row.id === editingId ? saved : row)) : [...prev, saved]
+      );
+      closeModal();
     } finally {
       setSaving(false);
     }
+  }
+
+  function openEdit(row: OutreachRecord) {
+    setEditingId(row.id);
+    setForm({
+      name: row.name ?? "",
+      company: row.company ?? "",
+      role: row.role ?? "",
+      source: row.source ?? "",
+      method: row.method || "X DM",
+      firstDate: row.firstDate ?? "",
+      notes: row.notes ?? "",
+      personalized: Boolean(row.personalized),
+      compliment: Boolean(row.compliment),
+      easy: Boolean(row.easy),
+      value: Boolean(row.value),
+    });
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setEditingId(null);
+    setForm({ ...EMPTY_FORM });
+  }
+
+  async function deleteRow(id: string) {
+    setError(null);
+    const res = await fetch(`/api/outreach/${type}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Delete failed");
+      return;
+    }
+    setRows((prev) => prev.filter((row) => row.id !== id));
   }
 
   function logFollowUp(row: OutreachRecord) {
@@ -216,18 +259,19 @@ export default function OutreachBoard({
               <th className="th">Follow-ups</th>
               <th className="th">Dates</th>
               <th className="th">Notes</th>
+              <th className="th"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={8}>
-                  Loading from Google Sheets…
+                <td className="td py-10 text-center text-slate-500" colSpan={9}>
+                  Loading…
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={8}>
+                <td className="td py-10 text-center text-slate-500" colSpan={9}>
                   No outreach logged yet. Hit “Log outreach” to add your first one.
                 </td>
               </tr>
@@ -289,6 +333,9 @@ export default function OutreachBoard({
                     <p>Last: {row.lastDate || "—"}</p>
                   </td>
                   <td className="td max-w-[220px] text-xs text-slate-400">{row.notes || "—"}</td>
+                  <td className="td">
+                    <RowActions onEdit={() => openEdit(row)} onDelete={() => deleteRow(row.id)} />
+                  </td>
                 </tr>
               ))
             )}
@@ -296,8 +343,12 @@ export default function OutreachBoard({
         </table>
       </div>
 
-      <Modal title={`Log ${type} outreach`} open={modalOpen} onClose={() => setModalOpen(false)}>
-        <form onSubmit={submitNew} className="space-y-4">
+      <Modal
+        title={editingId ? `Edit ${type} outreach` : `Log ${type} outreach`}
+        open={modalOpen}
+        onClose={closeModal}
+      >
+        <form onSubmit={submitForm} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label">Name</label>
@@ -382,11 +433,11 @@ export default function OutreachBoard({
           </div>
 
           <div className="flex justify-end gap-3">
-            <button type="button" className="btn-ghost" onClick={() => setModalOpen(false)}>
+            <button type="button" className="btn-ghost" onClick={closeModal}>
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save to sheet"}
+              {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
             </button>
           </div>
         </form>

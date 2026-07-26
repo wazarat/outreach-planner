@@ -7,6 +7,7 @@ import Modal from "@/components/Modal";
 import PrincipleHeader from "@/components/PrincipleHeader";
 import ProgressBar from "@/components/ProgressBar";
 import QuoteBlock from "@/components/QuoteBlock";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import TierBadge from "@/components/TierBadge";
 import { useSheet } from "@/lib/use-sheet";
@@ -54,15 +55,19 @@ export default function PrincipleTwoPage() {
 
   const [moveModal, setMoveModal] = useState(false);
   const [moveForm, setMoveForm] = useState({ ...EMPTY_MOVE });
+  const [editingMoveId, setEditingMoveId] = useState<string | null>(null);
 
   const [noForm, setNoForm] = useState({ item: "", reason: "" });
+  const [editingNoId, setEditingNoId] = useState<string | null>(null);
 
   const [famousModal, setFamousModal] = useState(false);
   const [famousStep, setFamousStep] = useState<"pick" | "details">("pick");
   const [famousForm, setFamousForm] = useState({ contentId: "", contentTitle: "", metric: "", note: "" });
+  const [editingFamousId, setEditingFamousId] = useState<string | null>(null);
 
   const [sevenModal, setSevenModal] = useState(false);
   const [sevenForm, setSevenForm] = useState({ ...EMPTY_SEVEN });
+  const [editingSevenId, setEditingSevenId] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -96,6 +101,41 @@ export default function PrincipleTwoPage() {
 
   function openSevenModal(track: string) {
     setSevenForm({ ...EMPTY_SEVEN, track });
+    setEditingSevenId(null);
+    setSevenModal(true);
+  }
+
+  function openEditMove(row: MarketMoveRecord) {
+    setMoveForm({
+      move: row.move ?? "",
+      problemSolved: row.problemSolved ?? "",
+      whoTalkedTo: row.whoTalkedTo ?? "",
+    });
+    setEditingMoveId(row.id);
+    setMoveModal(true);
+  }
+
+  function openEditFamous(row: FamousNoteRecord) {
+    setFamousForm({
+      contentId: row.contentId ?? "",
+      contentTitle: row.contentTitle ?? "",
+      metric: row.metric ?? "",
+      note: row.note ?? "",
+    });
+    setEditingFamousId(row.id);
+    setFamousStep("details");
+    setFamousModal(true);
+  }
+
+  function openEditSeven(row: SevenElevenFourRecord) {
+    setSevenForm({
+      track: row.track || "Hours",
+      title: row.title ?? "",
+      detail: row.detail ?? "",
+      priority: row.priority || "Medium",
+      minutes: row.minutes || 0,
+    });
+    setEditingSevenId(row.id);
     setSevenModal(true);
   }
 
@@ -135,13 +175,20 @@ export default function PrincipleTwoPage() {
               Every move: how you're doing it, and what problem you're solving that others can't.
             </p>
           </div>
-          <button className="btn-primary" onClick={() => { setMoveForm({ ...EMPTY_MOVE }); setMoveModal(true); }}>
+          <button
+            className="btn-primary"
+            onClick={() => {
+              setMoveForm({ ...EMPTY_MOVE });
+              setEditingMoveId(null);
+              setMoveModal(true);
+            }}
+          >
             <Plus size={16} /> Add move
           </button>
         </div>
 
         {moves.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : moves.rows.length === 0 ? (
           <div className="card py-10 text-center text-sm text-slate-500">
             No moves logged yet. What are you doing right now to build your own market?
@@ -152,7 +199,13 @@ export default function PrincipleTwoPage() {
               <div key={row.id} className="card">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <p className="font-medium text-slate-100">{row.move}</p>
-                  <span className="shrink-0 text-xs text-slate-500">{row.date}</span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="text-xs text-slate-500">{row.date}</span>
+                    <RowActions
+                      onEdit={() => openEditMove(row)}
+                      onDelete={() => moves.remove(row.id)}
+                    />
+                  </div>
                 </div>
                 <dl className="space-y-2 text-sm">
                   <div>
@@ -187,7 +240,14 @@ export default function PrincipleTwoPage() {
 
         <form
           onSubmit={(e) =>
-            submit(e, () => sayNo.add(noForm), () => setNoForm({ item: "", reason: "" }))
+            submit(
+              e,
+              () => (editingNoId ? sayNo.patch(editingNoId, noForm) : sayNo.add(noForm)),
+              () => {
+                setNoForm({ item: "", reason: "" });
+                setEditingNoId(null);
+              }
+            )
           }
           className="card mb-4 flex flex-wrap items-end gap-3"
         >
@@ -210,12 +270,24 @@ export default function PrincipleTwoPage() {
             />
           </div>
           <button type="submit" className="btn-primary" disabled={saving || !noForm.item.trim()}>
-            <Plus size={16} /> Add
+            <Plus size={16} /> {editingNoId ? "Save changes" : "Add"}
           </button>
+          {editingNoId ? (
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                setEditingNoId(null);
+                setNoForm({ item: "", reason: "" });
+              }}
+            >
+              Cancel
+            </button>
+          ) : null}
         </form>
 
         {sayNo.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : sayNo.rows.length === 0 ? (
           <div className="card py-8 text-center text-sm text-slate-500">
             Nothing here yet. The first no is the hardest.
@@ -232,6 +304,13 @@ export default function PrincipleTwoPage() {
                   {row.reason ? <p className="text-xs text-slate-500">{row.reason}</p> : null}
                 </div>
                 <span className="shrink-0 text-xs text-slate-500">{row.date}</span>
+                <RowActions
+                  onEdit={() => {
+                    setEditingNoId(row.id);
+                    setNoForm({ item: row.item ?? "", reason: row.reason ?? "" });
+                  }}
+                  onDelete={() => sayNo.remove(row.id)}
+                />
               </li>
             ))}
           </ul>
@@ -252,6 +331,7 @@ export default function PrincipleTwoPage() {
             className="btn-primary"
             onClick={() => {
               setFamousStep("pick");
+              setEditingFamousId(null);
               setFamousModal(true);
             }}
           >
@@ -260,7 +340,7 @@ export default function PrincipleTwoPage() {
         </div>
 
         {famous.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : famous.rows.length === 0 ? (
           <div className="card py-8 text-center text-sm text-slate-500">
             No metric notes yet. Pick a content piece and note how its metrics are making you famous
@@ -273,6 +353,10 @@ export default function PrincipleTwoPage() {
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="badge bg-ink-800 text-slate-300">{row.metric || "Metric"}</span>
                   <span className="ml-auto text-xs text-slate-500">{row.date}</span>
+                  <RowActions
+                    onEdit={() => openEditFamous(row)}
+                    onDelete={() => famous.remove(row.id)}
+                  />
                 </div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Content
@@ -330,6 +414,10 @@ export default function PrincipleTwoPage() {
                         <div className="flex items-center gap-2">
                           <p className="min-w-0 flex-1 truncate text-sm text-slate-200">{row.title}</p>
                           <TierBadge value={row.priority} />
+                          <RowActions
+                            onEdit={() => openEditSeven(row)}
+                            onDelete={() => seven.remove(row.id)}
+                          />
                         </div>
                         <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
                           {key === "Hours" && row.minutes ? <span>{row.minutes} min</span> : null}
@@ -350,9 +438,25 @@ export default function PrincipleTwoPage() {
       </section>
 
       {/* ---- Market move modal ---- */}
-      <Modal title="Add a market-building move" open={moveModal} onClose={() => setMoveModal(false)}>
+      <Modal
+        title={editingMoveId ? "Edit market-building move" : "Add a market-building move"}
+        open={moveModal}
+        onClose={() => {
+          setMoveModal(false);
+          setEditingMoveId(null);
+        }}
+      >
         <form
-          onSubmit={(e) => submit(e, () => moves.add(moveForm), () => setMoveModal(false))}
+          onSubmit={(e) =>
+            submit(
+              e,
+              () => (editingMoveId ? moves.patch(editingMoveId, moveForm) : moves.add(moveForm)),
+              () => {
+                setMoveModal(false);
+                setEditingMoveId(null);
+              }
+            )
+          }
           className="space-y-4"
         >
           <div>
@@ -383,11 +487,18 @@ export default function PrincipleTwoPage() {
             />
           </div>
           <div className="flex justify-end gap-3">
-            <button type="button" className="btn-ghost" onClick={() => setMoveModal(false)}>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                setMoveModal(false);
+                setEditingMoveId(null);
+              }}
+            >
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save to sheet"}
+              {saving ? "Saving…" : editingMoveId ? "Save changes" : "Save"}
             </button>
           </div>
         </form>
@@ -395,15 +506,36 @@ export default function PrincipleTwoPage() {
 
       {/* ---- Famous-for-a-few modal ---- */}
       <Modal
-        title={famousStep === "pick" ? "Pick a content piece" : "Add a metric note"}
+        title={
+          editingFamousId
+            ? "Edit metric note"
+            : famousStep === "pick"
+              ? "Pick a content piece"
+              : "Add a metric note"
+        }
         open={famousModal}
-        onClose={() => setFamousModal(false)}
+        onClose={() => {
+          setFamousModal(false);
+          setEditingFamousId(null);
+        }}
       >
         {famousStep === "pick" ? (
           <ContentPicker onSelect={pickFamousContent} />
         ) : (
           <form
-            onSubmit={(e) => submit(e, () => famous.add(famousForm), () => setFamousModal(false))}
+            onSubmit={(e) =>
+              submit(
+                e,
+                () =>
+                  editingFamousId
+                    ? famous.patch(editingFamousId, famousForm)
+                    : famous.add(famousForm),
+                () => {
+                  setFamousModal(false);
+                  setEditingFamousId(null);
+                }
+              )
+            }
             className="space-y-4"
           >
             <div className="rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-sm text-slate-300">
@@ -430,11 +562,15 @@ export default function PrincipleTwoPage() {
               />
             </div>
             <div className="flex justify-between gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setFamousStep("pick")}>
-                Back
-              </button>
+              {editingFamousId ? (
+                <span />
+              ) : (
+                <button type="button" className="btn-ghost" onClick={() => setFamousStep("pick")}>
+                  Back
+                </button>
+              )}
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Saving…" : "Save to sheet"}
+                {saving ? "Saving…" : editingFamousId ? "Save changes" : "Save"}
               </button>
             </div>
           </form>
@@ -443,12 +579,25 @@ export default function PrincipleTwoPage() {
 
       {/* ---- 7-11-4 entry modal ---- */}
       <Modal
-        title={`Add to ${sevenForm.track}`}
+        title={editingSevenId ? `Edit ${sevenForm.track} entry` : `Add to ${sevenForm.track}`}
         open={sevenModal}
-        onClose={() => setSevenModal(false)}
+        onClose={() => {
+          setSevenModal(false);
+          setEditingSevenId(null);
+        }}
       >
         <form
-          onSubmit={(e) => submit(e, () => seven.add(sevenForm), () => setSevenModal(false))}
+          onSubmit={(e) =>
+            submit(
+              e,
+              () =>
+                editingSevenId ? seven.patch(editingSevenId, sevenForm) : seven.add(sevenForm),
+              () => {
+                setSevenModal(false);
+                setEditingSevenId(null);
+              }
+            )
+          }
           className="space-y-4"
         >
           <div className="grid grid-cols-2 gap-4">
@@ -521,11 +670,18 @@ export default function PrincipleTwoPage() {
             />
           </div>
           <div className="flex justify-end gap-3">
-            <button type="button" className="btn-ghost" onClick={() => setSevenModal(false)}>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                setSevenModal(false);
+                setEditingSevenId(null);
+              }}
+            >
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save to sheet"}
+              {saving ? "Saving…" : editingSevenId ? "Save changes" : "Save"}
             </button>
           </div>
         </form>

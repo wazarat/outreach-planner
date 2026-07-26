@@ -6,6 +6,7 @@ import { Plus, ExternalLink } from "lucide-react";
 import Modal from "@/components/Modal";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
 import { computeContentMetrics } from "@/lib/metrics";
@@ -37,6 +38,7 @@ export default function ContentPage() {
   const [accountFilter, setAccountFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
 
   const load = useCallback(async () => {
@@ -84,27 +86,67 @@ export default function ContentPage() {
     setRows((prev) => prev.map((row) => (row.id === id ? (data.row as ContentRecord) : row)));
   }
 
-  async function submitNew(e: React.FormEvent) {
+  async function submitForm(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
       const res = await fetch("/api/content", {
-        method: "POST",
+        method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Save failed");
         return;
       }
-      setRows((prev) => [...prev, data.row as ContentRecord]);
-      setForm({ ...EMPTY_FORM });
-      setModalOpen(false);
+      const saved = data.row as ContentRecord;
+      setRows((prev) =>
+        editingId ? prev.map((row) => (row.id === editingId ? saved : row)) : [...prev, saved]
+      );
+      closeModal();
     } finally {
       setSaving(false);
     }
+  }
+
+  function openEdit(row: ContentRecord) {
+    setEditingId(row.id);
+    setForm({
+      platform: row.platform || "X",
+      account: row.account || "Personal",
+      date: row.date ?? "",
+      status: row.status || "Planned",
+      hook: row.hook ?? "",
+      retain: row.retain ?? "",
+      reward: row.reward ?? "",
+      giveTake: row.giveTake || "Give",
+      url: row.url ?? "",
+      notes: row.notes ?? "",
+    });
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setEditingId(null);
+    setForm({ ...EMPTY_FORM });
+  }
+
+  async function deleteRow(id: string) {
+    setError(null);
+    const res = await fetch("/api/content", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Delete failed");
+      return;
+    }
+    setRows((prev) => prev.filter((row) => row.id !== id));
   }
 
   if (setupError) {
@@ -172,7 +214,7 @@ export default function ContentPage() {
       {error ? <p className="mb-4 text-sm text-rose-400">{error}</p> : null}
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+        <p className="text-sm text-slate-500">Loading…</p>
       ) : filtered.length === 0 ? (
         <div className="card py-10 text-center text-sm text-slate-500">
           No content planned yet. Hit “Plan content” to add your first piece.
@@ -196,6 +238,7 @@ export default function ContentPage() {
                 </span>
                 <StatusBadge status={row.status} />
                 <span className="ml-auto text-xs text-slate-500">{row.date}</span>
+                <RowActions onEdit={() => openEdit(row)} onDelete={() => deleteRow(row.id)} />
               </div>
               <dl className="space-y-2 text-sm">
                 <div>
@@ -242,8 +285,12 @@ export default function ContentPage() {
         </div>
       )}
 
-      <Modal title="Plan a content piece" open={modalOpen} onClose={() => setModalOpen(false)}>
-        <form onSubmit={submitNew} className="space-y-4">
+      <Modal
+        title={editingId ? "Edit content piece" : "Plan a content piece"}
+        open={modalOpen}
+        onClose={closeModal}
+      >
+        <form onSubmit={submitForm} className="space-y-4">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
               <label className="label">Platform</label>
@@ -336,11 +383,11 @@ export default function ContentPage() {
           </div>
 
           <div className="flex justify-end gap-3">
-            <button type="button" className="btn-ghost" onClick={() => setModalOpen(false)}>
+            <button type="button" className="btn-ghost" onClick={closeModal}>
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save to sheet"}
+              {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
             </button>
           </div>
         </form>

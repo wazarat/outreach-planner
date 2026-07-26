@@ -112,7 +112,7 @@ export default function DashboardPage() {
 
       {setupError ? <SetupNotice message={setupError} /> : null}
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
-      {loading ? <p className="text-sm text-slate-500">Loading metrics from Google Sheets…</p> : null}
+      {loading ? <p className="text-sm text-slate-500">Loading metrics…</p> : null}
 
       {data ? (
         <div className="space-y-10">

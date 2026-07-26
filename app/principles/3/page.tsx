@@ -7,6 +7,7 @@ import ContentPicker, { contentTitle } from "@/components/ContentPicker";
 import Modal from "@/components/Modal";
 import PrincipleHeader from "@/components/PrincipleHeader";
 import QuoteBlock from "@/components/QuoteBlock";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import TierBadge from "@/components/TierBadge";
 import { useSheet } from "@/lib/use-sheet";
@@ -37,9 +38,11 @@ export default function PrincipleThreePage() {
     signalNote: "",
     signalSize: "Small",
   });
+  const [editingSignalId, setEditingSignalId] = useState<string | null>(null);
 
   const [positionModal, setPositionModal] = useState<string | null>(null);
   const [positionForm, setPositionForm] = useState({ category: "", note: "" });
+  const [editingPositionId, setEditingPositionId] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -55,15 +58,39 @@ export default function PrincipleThreePage() {
 
   function openPositionModal(position: string) {
     setPositionForm({ category: MARKET_POSITIONS[position][0], note: "" });
+    setEditingPositionId(null);
     setPositionModal(position);
+  }
+
+  function openEditSignal(row: SignalRecord) {
+    setSignalForm({
+      contentId: row.contentId ?? "",
+      contentTitle: row.contentTitle ?? "",
+      signalNote: row.signalNote ?? "",
+      signalSize: row.signalSize || "Small",
+    });
+    setEditingSignalId(row.id);
+    setSignalStep("details");
+    setSignalModal(true);
+  }
+
+  function openEditPosition(row: PositioningRecord) {
+    setPositionForm({ category: row.category ?? "", note: row.note ?? "" });
+    setEditingPositionId(row.id);
+    setPositionModal(row.position);
   }
 
   async function submitSignal(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      const ok = await signals.add(signalForm);
-      if (ok) setSignalModal(false);
+      const ok = editingSignalId
+        ? await signals.patch(editingSignalId, signalForm)
+        : await signals.add(signalForm);
+      if (ok) {
+        setSignalModal(false);
+        setEditingSignalId(null);
+      }
     } finally {
       setSaving(false);
     }
@@ -74,8 +101,13 @@ export default function PrincipleThreePage() {
     if (!positionModal) return;
     setSaving(true);
     try {
-      const ok = await positioning.add({ position: positionModal, ...positionForm });
-      if (ok) setPositionModal(null);
+      const ok = editingPositionId
+        ? await positioning.patch(editingPositionId, { position: positionModal, ...positionForm })
+        : await positioning.add({ position: positionModal, ...positionForm });
+      if (ok) {
+        setPositionModal(null);
+        setEditingPositionId(null);
+      }
     } finally {
       setSaving(false);
     }
@@ -120,6 +152,7 @@ export default function PrincipleThreePage() {
             className="btn-primary"
             onClick={() => {
               setSignalStep("pick");
+              setEditingSignalId(null);
               setSignalModal(true);
             }}
           >
@@ -128,7 +161,7 @@ export default function PrincipleThreePage() {
         </div>
 
         {signals.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : signals.rows.length === 0 ? (
           <div className="card py-10 text-center text-sm text-slate-500">
             No signals yet. Pick a piece of content and note the signal it provides to your market.
@@ -140,6 +173,10 @@ export default function PrincipleThreePage() {
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <TierBadge value={row.signalSize} prefix="Signal" />
                   <span className="ml-auto text-xs text-slate-500">{row.date}</span>
+                  <RowActions
+                    onEdit={() => openEditSignal(row)}
+                    onDelete={() => signals.remove(row.id)}
+                  />
                 </div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Content
@@ -209,6 +246,10 @@ export default function PrincipleThreePage() {
                         <div className="mb-1 flex items-center gap-2">
                           <span className="badge bg-accent-soft text-accent">{row.category}</span>
                           <span className="ml-auto text-xs text-slate-500">{row.date}</span>
+                          <RowActions
+                            onEdit={() => openEditPosition(row)}
+                            onDelete={() => positioning.remove(row.id)}
+                          />
                         </div>
                         <p className="text-sm text-slate-200">{row.note}</p>
                       </li>
@@ -223,9 +264,18 @@ export default function PrincipleThreePage() {
 
       {/* ---- Signal modal ---- */}
       <Modal
-        title={signalStep === "pick" ? "Pick a content piece" : "What signal does it send?"}
+        title={
+          editingSignalId
+            ? "Edit signal"
+            : signalStep === "pick"
+              ? "Pick a content piece"
+              : "What signal does it send?"
+        }
         open={signalModal}
-        onClose={() => setSignalModal(false)}
+        onClose={() => {
+          setSignalModal(false);
+          setEditingSignalId(null);
+        }}
       >
         {signalStep === "pick" ? (
           <ContentPicker onSelect={pickSignalContent} />
@@ -257,11 +307,15 @@ export default function PrincipleThreePage() {
               </select>
             </div>
             <div className="flex justify-between gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setSignalStep("pick")}>
-                Back
-              </button>
+              {editingSignalId ? (
+                <span />
+              ) : (
+                <button type="button" className="btn-ghost" onClick={() => setSignalStep("pick")}>
+                  Back
+                </button>
+              )}
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Saving…" : "Save to sheet"}
+                {saving ? "Saving…" : editingSignalId ? "Save changes" : "Save"}
               </button>
             </div>
           </form>
@@ -270,9 +324,18 @@ export default function PrincipleThreePage() {
 
       {/* ---- Positioning modal ---- */}
       <Modal
-        title={positionModal ? `Add a ${positionModal} note` : ""}
+        title={
+          positionModal
+            ? editingPositionId
+              ? `Edit ${positionModal} note`
+              : `Add a ${positionModal} note`
+            : ""
+        }
         open={positionModal !== null}
-        onClose={() => setPositionModal(null)}
+        onClose={() => {
+          setPositionModal(null);
+          setEditingPositionId(null);
+        }}
       >
         {positionModal ? (
           <form onSubmit={submitPosition} className="space-y-4">
@@ -299,11 +362,18 @@ export default function PrincipleThreePage() {
               />
             </div>
             <div className="flex justify-end gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setPositionModal(null)}>
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => {
+                  setPositionModal(null);
+                  setEditingPositionId(null);
+                }}
+              >
                 Cancel
               </button>
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Saving…" : "Save to sheet"}
+                {saving ? "Saving…" : editingPositionId ? "Save changes" : "Save"}
               </button>
             </div>
           </form>

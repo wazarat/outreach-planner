@@ -1,7 +1,7 @@
 import { ModuleKey } from "./config";
 
 /**
- * URL section slugs for /api/principles/[section] mapped to sheet modules.
+ * URL section slugs for /api/principles/[section] mapped to data modules.
  * Shared by the API route (server) and the principle pages (client).
  */
 export const PRINCIPLE_SECTIONS = {

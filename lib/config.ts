@@ -24,9 +24,8 @@ export interface ColumnDef {
 
 export interface ModuleConfig {
   key: ModuleKey;
-  defaultTab: string;
-  tabEnv: string;
-  spreadsheetEnv: string;
+  /** Postgres table name for this module. */
+  table: string;
   columns: ColumnDef[];
 }
 
@@ -57,23 +56,17 @@ function outreachColumns(sourceHeader: string, easyHeader: string): ColumnDef[] 
 export const MODULES: Record<ModuleKey, ModuleConfig> = {
   cold: {
     key: "cold",
-    defaultTab: "Cold Outreach",
-    tabEnv: "COLD_SHEET_TAB",
-    spreadsheetEnv: "COLD_SPREADSHEET_ID",
+    table: "cold_outreach",
     columns: outreachColumns("How I Found Them", "Easy To Read?"),
   },
   warm: {
     key: "warm",
-    defaultTab: "Warm Outreach",
-    tabEnv: "WARM_SHEET_TAB",
-    spreadsheetEnv: "WARM_SPREADSHEET_ID",
+    table: "warm_outreach",
     columns: outreachColumns("How I Know Them", "Easy To Understand?"),
   },
   content: {
     key: "content",
-    defaultTab: "Content",
-    tabEnv: "CONTENT_SHEET_TAB",
-    spreadsheetEnv: "CONTENT_SPREADSHEET_ID",
+    table: "content",
     columns: [
       s("id", "ID"),
       s("platform", "Platform"),
@@ -90,9 +83,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   offers: {
     key: "offers",
-    defaultTab: "Offers",
-    tabEnv: "OFFERS_SHEET_TAB",
-    spreadsheetEnv: "OFFERS_SPREADSHEET_ID",
+    table: "offers",
     columns: [
       s("id", "ID"),
       s("name", "Offer Name"),
@@ -109,9 +100,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   leads: {
     key: "leads",
-    defaultTab: "Leads",
-    tabEnv: "LEADS_SHEET_TAB",
-    spreadsheetEnv: "LEADS_SPREADSHEET_ID",
+    table: "leads",
     columns: [
       s("id", "ID"),
       s("name", "Name"),
@@ -127,9 +116,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p1People: {
     key: "p1People",
-    defaultTab: "P1 Valued People",
-    tabEnv: "P1_PEOPLE_SHEET_TAB",
-    spreadsheetEnv: "P1_PEOPLE_SPREADSHEET_ID",
+    table: "p1_valued_people",
     columns: [
       s("id", "ID"),
       s("date", "Date Added"),
@@ -144,9 +131,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p1Points: {
     key: "p1Points",
-    defaultTab: "P1 Points",
-    tabEnv: "P1_POINTS_SHEET_TAB",
-    spreadsheetEnv: "P1_POINTS_SPREADSHEET_ID",
+    table: "p1_points",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -156,9 +141,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p2Moves: {
     key: "p2Moves",
-    defaultTab: "P2 Market Moves",
-    tabEnv: "P2_MOVES_SHEET_TAB",
-    spreadsheetEnv: "P2_MOVES_SPREADSHEET_ID",
+    table: "p2_market_moves",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -169,9 +152,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p2SayNo: {
     key: "p2SayNo",
-    defaultTab: "P2 Say No",
-    tabEnv: "P2_SAYNO_SHEET_TAB",
-    spreadsheetEnv: "P2_SAYNO_SPREADSHEET_ID",
+    table: "p2_say_no",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -181,9 +162,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p2Famous: {
     key: "p2Famous",
-    defaultTab: "P2 Famous Notes",
-    tabEnv: "P2_FAMOUS_SHEET_TAB",
-    spreadsheetEnv: "P2_FAMOUS_SPREADSHEET_ID",
+    table: "p2_famous_notes",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -195,9 +174,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p2Seven: {
     key: "p2Seven",
-    defaultTab: "P2 7-11-4",
-    tabEnv: "P2_SEVEN_SHEET_TAB",
-    spreadsheetEnv: "P2_SEVEN_SPREADSHEET_ID",
+    table: "p2_seven_eleven_four",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -210,9 +187,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p3Signals: {
     key: "p3Signals",
-    defaultTab: "P3 Signals",
-    tabEnv: "P3_SIGNALS_SHEET_TAB",
-    spreadsheetEnv: "P3_SIGNALS_SPREADSHEET_ID",
+    table: "p3_signals",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -227,9 +202,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p3Positioning: {
     key: "p3Positioning",
-    defaultTab: "P3 Positioning",
-    tabEnv: "P3_POSITIONING_SHEET_TAB",
-    spreadsheetEnv: "P3_POSITIONING_SPREADSHEET_ID",
+    table: "p3_positioning",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -240,9 +213,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
   },
   p4Champions: {
     key: "p4Champions",
-    defaultTab: "P4 Champions",
-    tabEnv: "P4_CHAMPIONS_SHEET_TAB",
-    spreadsheetEnv: "P4_CHAMPIONS_SPREADSHEET_ID",
+    table: "p4_champions",
     columns: [
       s("id", "ID"),
       s("date", "Date"),
@@ -259,12 +230,4 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
 
 export function getModuleConfig(key: string): ModuleConfig | null {
   return (MODULES as Record<string, ModuleConfig>)[key] ?? null;
-}
-
-export function getSpreadsheetId(cfg: ModuleConfig): string {
-  return process.env[cfg.spreadsheetEnv] || process.env.SHEETS_SPREADSHEET_ID || "";
-}
-
-export function getTabName(cfg: ModuleConfig): string {
-  return process.env[cfg.tabEnv] || cfg.defaultTab;
 }

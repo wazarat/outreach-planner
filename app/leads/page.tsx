@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
 import { LeadRecord } from "@/lib/types";
@@ -121,6 +122,21 @@ export default function LeadsPage() {
     setRows((prev) => prev.map((row) => (row.id === id ? (data.row as LeadRecord) : row)));
   }
 
+  async function deleteRow(id: string) {
+    setError(null);
+    const res = await fetch("/api/leads", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Delete failed");
+      return;
+    }
+    setRows((prev) => prev.filter((row) => row.id !== id));
+  }
+
   if (setupError) {
     return (
       <>
@@ -145,7 +161,7 @@ export default function LeadsPage() {
 
       {!instantlyConfigured ? (
         <div className="mb-6">
-          <SetupNotice message="Instantly.ai is not configured yet. Add INSTANTLY_API_KEY to .env.local to enable live lead sync. You can still track leads manually in the sheet." />
+          <SetupNotice message="Instantly.ai is not configured yet. Add INSTANTLY_API_KEY to .env.local to enable live lead sync." />
         </div>
       ) : null}
 
@@ -181,18 +197,19 @@ export default function LeadsPage() {
               <th className="th">Came in for</th>
               <th className="th">Potential value</th>
               <th className="th">Notes</th>
+              <th className="th"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={6}>
-                  Loading from Google Sheets…
+                <td className="td py-10 text-center text-slate-500" colSpan={7}>
+                  Loading…
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={6}>
+                <td className="td py-10 text-center text-slate-500" colSpan={7}>
                   No leads yet. Hit “Sync from Instantly” to pull your campaigns in.
                 </td>
               </tr>
@@ -229,6 +246,9 @@ export default function LeadsPage() {
                       placeholder="Add a note…"
                       onSave={(next) => patchRow(row.id, { notes: next })}
                     />
+                  </td>
+                  <td className="td">
+                    <RowActions onDelete={() => deleteRow(row.id)} />
                   </td>
                 </tr>
               ))

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { isSheetsConfigured } from "./sheets";
+import { isDbConfigured } from "./db";
 
 export function notConfiguredResponse(): NextResponse | null {
-  if (isSheetsConfigured()) return null;
+  if (isDbConfigured()) return null;
   return NextResponse.json(
     {
       error:
-        "Google Sheets is not configured. Copy .env.example to .env.local and fill in GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY and SHEETS_SPREADSHEET_ID.",
+        "The database is not configured. Copy .env.example to .env.local and set DATABASE_URL to your Neon Postgres connection string, then run npm run bootstrap:db.",
       configured: false,
     },
     { status: 503 }

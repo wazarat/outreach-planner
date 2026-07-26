@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listRows } from "@/lib/sheets";
+import { listRows } from "@/lib/db";
 import { errorResponse, notConfiguredResponse } from "@/lib/api-helpers";
 import {
   combineOutreachMetrics,

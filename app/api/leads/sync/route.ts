@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { appendRows, listRows, newId, updateRow } from "@/lib/sheets";
+import { appendRows, listRows, newId, updateRow } from "@/lib/db";
 import { errorResponse, notConfiguredResponse } from "@/lib/api-helpers";
 import {
   isInstantlyConfigured,

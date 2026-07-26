@@ -55,7 +55,7 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="mt-auto px-3 text-[11px] leading-relaxed text-slate-600">
-        Data lives in your Google Sheets. Edit here or in the sheet — both stay in sync.
+        Data lives in your Neon Postgres database. Add, edit and delete everything right here.
       </div>
     </aside>
   );

@@ -7,6 +7,7 @@ import MetricCard from "@/components/MetricCard";
 import OutreachPicker, { PickableContact } from "@/components/OutreachPicker";
 import PrincipleHeader from "@/components/PrincipleHeader";
 import QuoteBlock from "@/components/QuoteBlock";
+import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import TierBadge from "@/components/TierBadge";
 import { useSheet } from "@/lib/use-sheet";
@@ -29,9 +30,11 @@ export default function PrincipleOnePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [step, setStep] = useState<"pick" | "details">("pick");
   const [personForm, setPersonForm] = useState({ ...EMPTY_PERSON_FORM });
+  const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [pointForm, setPointForm] = useState({ note: "", points: 1 });
+  const [editingPointId, setEditingPointId] = useState<string | null>(null);
   const [addingPoint, setAddingPoint] = useState(false);
 
   const totalPoints = useMemo(
@@ -45,7 +48,23 @@ export default function PrincipleOnePage() {
 
   function openImport() {
     setPersonForm({ ...EMPTY_PERSON_FORM });
+    setEditingPersonId(null);
     setStep("pick");
+    setModalOpen(true);
+  }
+
+  function openEditPerson(row: ValuedPersonRecord) {
+    setPersonForm({
+      outreachId: row.outreachId ?? "",
+      name: row.name ?? "",
+      company: row.company ?? "",
+      valueLevel: row.valueLevel || "Normal",
+      howTheyValue: row.howTheyValue ?? "",
+      internalChampion: row.internalChampion ?? "",
+      notes: row.notes ?? "",
+    });
+    setEditingPersonId(row.id);
+    setStep("details");
     setModalOpen(true);
   }
 
@@ -63,8 +82,13 @@ export default function PrincipleOnePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const ok = await people.add(personForm);
-      if (ok) setModalOpen(false);
+      const ok = editingPersonId
+        ? await people.patch(editingPersonId, personForm)
+        : await people.add(personForm);
+      if (ok) {
+        setModalOpen(false);
+        setEditingPersonId(null);
+      }
     } finally {
       setSaving(false);
     }
@@ -75,8 +99,13 @@ export default function PrincipleOnePage() {
     if (!pointForm.note.trim()) return;
     setAddingPoint(true);
     try {
-      const ok = await points.add(pointForm);
-      if (ok) setPointForm({ note: "", points: 1 });
+      const ok = editingPointId
+        ? await points.patch(editingPointId, pointForm)
+        : await points.add(pointForm);
+      if (ok) {
+        setPointForm({ note: "", points: 1 });
+        setEditingPointId(null);
+      }
     } finally {
       setAddingPoint(false);
     }
@@ -124,7 +153,7 @@ export default function PrincipleOnePage() {
         </div>
 
         {people.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : people.rows.length === 0 ? (
           <div className="card py-10 text-center text-sm text-slate-500">
             Nobody imported yet. Pull in the people from your outreach lists who really value what
@@ -141,6 +170,7 @@ export default function PrincipleOnePage() {
                   <th className="th">How Much They Value It</th>
                   <th className="th">Internal Champion</th>
                   <th className="th">Notes</th>
+                  <th className="th"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-700/60">
@@ -162,6 +192,12 @@ export default function PrincipleOnePage() {
                     <td className="td max-w-[240px]">{row.howTheyValue || "—"}</td>
                     <td className="td">{row.internalChampion || "—"}</td>
                     <td className="td max-w-[200px] text-slate-400">{row.notes || "—"}</td>
+                    <td className="td">
+                      <RowActions
+                        onEdit={() => openEditPerson(row)}
+                        onDelete={() => people.remove(row.id)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -207,12 +243,25 @@ export default function PrincipleOnePage() {
             />
           </div>
           <button type="submit" className="btn-primary" disabled={addingPoint || !pointForm.note.trim()}>
-            <Plus size={16} /> {addingPoint ? "Adding…" : "Add points"}
+            <Plus size={16} />{" "}
+            {addingPoint ? "Saving…" : editingPointId ? "Save changes" : "Add points"}
           </button>
+          {editingPointId ? (
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                setEditingPointId(null);
+                setPointForm({ note: "", points: 1 });
+              }}
+            >
+              Cancel
+            </button>
+          ) : null}
         </form>
 
         {points.loading ? (
-          <p className="text-sm text-slate-500">Loading from Google Sheets…</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : points.rows.length === 0 ? (
           <div className="card py-8 text-center text-sm text-slate-500">
             No points yet. Log the first thing you got right for one of your people.
@@ -227,6 +276,13 @@ export default function PrincipleOnePage() {
                 <p className="min-w-0 flex-1 text-sm text-slate-200">{row.note}</p>
                 <span className="text-xs text-slate-500">{row.date}</span>
                 <span className="badge bg-accent-soft text-accent">+{row.points || 0}</span>
+                <RowActions
+                  onEdit={() => {
+                    setEditingPointId(row.id);
+                    setPointForm({ note: row.note ?? "", points: row.points || 1 });
+                  }}
+                  onDelete={() => points.remove(row.id)}
+                />
               </li>
             ))}
           </ul>
@@ -235,9 +291,18 @@ export default function PrincipleOnePage() {
 
       {/* ---- Import modal ---- */}
       <Modal
-        title={step === "pick" ? "Import from outreach" : "How much do they value it?"}
+        title={
+          editingPersonId
+            ? "Edit person"
+            : step === "pick"
+              ? "Import from outreach"
+              : "How much do they value it?"
+        }
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingPersonId(null);
+        }}
       >
         {step === "pick" ? (
           <>
@@ -313,11 +378,15 @@ export default function PrincipleOnePage() {
               />
             </div>
             <div className="flex justify-between gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setStep("pick")}>
-                Back
-              </button>
+              {editingPersonId ? (
+                <span />
+              ) : (
+                <button type="button" className="btn-ghost" onClick={() => setStep("pick")}>
+                  Back
+                </button>
+              )}
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Saving…" : "Save to sheet"}
+                {saving ? "Saving…" : editingPersonId ? "Save changes" : "Save"}
               </button>
             </div>
           </form>
