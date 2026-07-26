@@ -34,6 +34,8 @@ const STYLES: Record<string, string> = {
   "Core Offer": "bg-accent-soft text-accent",
   "Innovation Long-Term": "bg-violet-500/15 text-violet-400",
   "Innovation Short-Term": "bg-sky-500/15 text-sky-400",
+  // P7 package completeness
+  "Not yet": "bg-amber-500/15 text-amber-400",
 };
 
 export default function TierBadge({ value, prefix }: { value: string; prefix?: string }) {

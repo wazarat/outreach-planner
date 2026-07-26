@@ -271,6 +271,108 @@ export interface EcosystemOfferRecord {
   notes: string;
 }
 
+// ---- Principles (7-8) ----
+
+/** P7 — a deep journey profile hanging off a canonical persona. */
+export interface JourneyPersonaRecord {
+  id: string;
+  date: string;
+  personaId: string;
+  personaName: string;
+  language: string;
+  endGoal: string;
+  communication: string;
+  resonates: string;
+  brandingProblems: string;
+  hypothesisValidation: string;
+  hyperTargeted: string;
+  customized: string;
+  allDataCollected: string;
+  spokenToRefs: string;
+  notes: string;
+}
+
+/** P7 — an extra data point collected for a journey persona profile. */
+export interface JourneyDataPointRecord {
+  id: string;
+  date: string;
+  profileId: string;
+  personaName: string;
+  label: string;
+  value: string;
+}
+
+/** P7 — the journey a hyper-targeted persona wants to go on. */
+export interface CustomerJourneyRecord {
+  id: string;
+  date: string;
+  personaId: string;
+  personaName: string;
+  wantSignals: string;
+  journeyWanted: string;
+  dreamOutcomeSelling: string;
+  firstSteps: string;
+  smallDecisions: string;
+  eventualOutcome: string;
+}
+
+/** P7 — a value a persona holds, bridging toward the solution. */
+export interface CustomerValueRecord {
+  id: string;
+  date: string;
+  personaId: string;
+  personaName: string;
+  value: string;
+  whyImportant: string;
+  bridgeToSolution: string;
+}
+
+/** P7 — a solution package of offers built for a persona. */
+export interface SolutionPackageRecord {
+  id: string;
+  date: string;
+  personaId: string;
+  personaName: string;
+  name: string;
+  offerRefs: string;
+  howItComesTogether: string;
+  everythingIncluded: string;
+  everythingNote: string;
+}
+
+/** P8 — a remarkability check on a solution package. */
+export interface RemarkableProductRecord {
+  id: string;
+  date: string;
+  packageId: string;
+  packageName: string;
+  genuineAdvantages: boolean;
+  realBenefits: boolean;
+  superiorExperience: boolean;
+  howRemarkable: string;
+  standOut: string;
+  solvingBeforeMoney: string;
+  howSolvingGenuinely: string;
+}
+
+/** P8 — what I want my personal brand to be, tied to my 7-11-4. */
+export interface BrandStatementRecord {
+  id: string;
+  date: string;
+  brandStatement: string;
+  sevenElevenFourPlan: string;
+  notes: string;
+}
+
+/** P8 — an action taken to build a more positive personal brand. */
+export interface BrandActionRecord {
+  id: string;
+  date: string;
+  action: string;
+  howPositive: string;
+  improvement: string;
+}
+
 export const VALUE_LEVELS = ["Normal", "Moderate", "High", "Really High"] as const;
 export const PRIORITIES = ["High", "Medium", "Low"] as const;
 export const SIGNAL_SIZES = ["Small", "Medium", "Large"] as const;
@@ -306,6 +408,8 @@ export const ECO_OFFER_CLASSIFICATIONS = [
   "Innovation Short-Term",
   "Undecided",
 ] as const;
+export const YES_NO_OPTIONS = ["Yes", "No"] as const;
+export const EVERYTHING_INCLUDED_OPTIONS = ["Yes", "Not yet"] as const;
 
 export function computeValueScore(offer: {
   dreamOutcome: number;

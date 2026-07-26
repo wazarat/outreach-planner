@@ -20,7 +20,15 @@ export type ModuleKey =
   | "personas"
   | "p6Connections"
   | "p6Giveaways"
-  | "p6Offers";
+  | "p6Offers"
+  | "p7Profiles"
+  | "p7DataPoints"
+  | "p7Journeys"
+  | "p7Values"
+  | "p7Packages"
+  | "p8Remarkable"
+  | "p8Brand"
+  | "p8BrandActions";
 
 export type ColumnType = "string" | "boolean" | "number";
 
@@ -338,6 +346,122 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       s("classification", "Classification"),
       s("personaRefs", "Personas"),
       s("notes", "Notes"),
+    ],
+  },
+  p7Profiles: {
+    key: "p7Profiles",
+    table: "p7_persona_profiles",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("personaId", "Persona Ref"),
+      s("personaName", "Persona"),
+      s("language", "Language They Want To Be Spoken In"),
+      s("endGoal", "Their End Goal"),
+      s("communication", "How I Can Communicate With Them"),
+      s("resonates", "What Will Resonate With Them"),
+      s("brandingProblems", "Branding Problems They Have"),
+      s("hypothesisValidation", "Hypothesis Validation For These Claims"),
+      s("hyperTargeted", "Hyper-Targeted?"),
+      s("customized", "Customized For Their Needs?"),
+      s("allDataCollected", "All The Data I Can Collect?"),
+      s("spokenToRefs", "People Spoken To"),
+      s("notes", "Notes"),
+    ],
+  },
+  p7DataPoints: {
+    key: "p7DataPoints",
+    table: "p7_data_points",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("profileId", "Profile Ref"),
+      s("personaName", "Persona"),
+      s("label", "Data Point"),
+      s("value", "Detail"),
+    ],
+  },
+  p7Journeys: {
+    key: "p7Journeys",
+    table: "p7_journeys",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("personaId", "Persona Ref"),
+      s("personaName", "Persona"),
+      s("wantSignals", "Data Points Suggesting They Want My Product"),
+      s("journeyWanted", "Customer Journey They Want"),
+      s("dreamOutcomeSelling", "Dream Outcome I'm Selling"),
+      s("firstSteps", "First Few Steps"),
+      s("smallDecisions", "Small Decisions I Can Help And Influence"),
+      s("eventualOutcome", "Eventual Dream Outcome"),
+    ],
+  },
+  p7Values: {
+    key: "p7Values",
+    table: "p7_values",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("personaId", "Persona Ref"),
+      s("personaName", "Persona"),
+      s("value", "Value"),
+      s("whyImportant", "Why It's Most Important To Them"),
+      s("bridgeToSolution", "How It Leads To The Solution"),
+    ],
+  },
+  p7Packages: {
+    key: "p7Packages",
+    table: "p7_packages",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("personaId", "Persona Ref"),
+      s("personaName", "Persona"),
+      s("name", "Package Name"),
+      s("offerRefs", "Offers In The Package"),
+      s("howItComesTogether", "How It All Comes Together"),
+      s("everythingIncluded", "Everything Of Value Included?"),
+      s("everythingNote", "What's Still Missing"),
+    ],
+  },
+  p8Remarkable: {
+    key: "p8Remarkable",
+    table: "p8_remarkable",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("packageId", "Package Ref"),
+      s("packageName", "Solution Package"),
+      b("genuineAdvantages", "Genuine Advantages?"),
+      b("realBenefits", "Real Benefits?"),
+      b("superiorExperience", "Superior Experience?"),
+      s("howRemarkable", "How I'm Making This Offer Remarkable"),
+      s("standOut", "What Makes Me Stand Out"),
+      s("solvingBeforeMoney", "Solving Needs Before Making Money?"),
+      s("howSolvingGenuinely", "How I'm Solving Their Needs Genuinely"),
+    ],
+  },
+  p8Brand: {
+    key: "p8Brand",
+    table: "p8_brand",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("brandStatement", "What I Want My Personal Brand To Be"),
+      s("sevenElevenFourPlan", "How I'll Complete My 7-11-4 In Accordance"),
+      s("notes", "Notes"),
+    ],
+  },
+  p8BrandActions: {
+    key: "p8BrandActions",
+    table: "p8_brand_actions",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("action", "Action I'll Take"),
+      s("howPositive", "How It Makes My Brand More Positive"),
+      s("improvement", "How It Can Be Further Improved"),
     ],
   },
 };

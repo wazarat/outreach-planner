@@ -22,6 +22,14 @@ export const PRINCIPLE_SECTIONS = {
   connections: "p6Connections",
   giveaways: "p6Giveaways",
   "ecosystem-offers": "p6Offers",
+  "journey-personas": "p7Profiles",
+  "persona-data-points": "p7DataPoints",
+  journeys: "p7Journeys",
+  "customer-values": "p7Values",
+  packages: "p7Packages",
+  "remarkable-products": "p8Remarkable",
+  brand: "p8Brand",
+  "brand-actions": "p8BrandActions",
 } as const satisfies Record<string, ModuleKey>;
 
 export type PrincipleSection = keyof typeof PRINCIPLE_SECTIONS;
@@ -77,6 +85,18 @@ export const PRINCIPLES: PrincipleMeta[] = [
     tagline: "Connect every offer and idea into one ecosystem that serves my personas.",
     implemented: true,
   },
-  { number: 7, slug: "7", title: "Principle 7", tagline: "Coming in the next iteration.", implemented: false },
-  { number: 8, slug: "8", title: "Principle 8", tagline: "Coming in the next iteration.", implemented: false },
+  {
+    number: 7,
+    slug: "7",
+    title: "Create Journeys",
+    tagline: "Become a business of transformation — meet people where they are and move them to what they want even more.",
+    implemented: true,
+  },
+  {
+    number: 8,
+    slug: "8",
+    title: "Positively Remarkable",
+    tagline: "Build remarkable products and a positive personal brand that grows at the speed of sound.",
+    implemented: true,
+  },
 ];
