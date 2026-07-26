@@ -12,7 +12,15 @@ export type ModuleKey =
   | "p2Seven"
   | "p3Signals"
   | "p3Positioning"
-  | "p4Champions";
+  | "p4Champions"
+  | "p5Philosophies"
+  | "p5References"
+  | "p5SayNo"
+  | "p5Differentiators"
+  | "personas"
+  | "p6Connections"
+  | "p6Giveaways"
+  | "p6Offers";
 
 export type ColumnType = "string" | "boolean" | "number";
 
@@ -223,6 +231,112 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       s("company", "Company"),
       s("role", "Role"),
       s("championType", "Champion Type"),
+      s("notes", "Notes"),
+    ],
+  },
+  p5Philosophies: {
+    key: "p5Philosophies",
+    table: "p5_philosophies",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("philosophy", "Philosophy"),
+      s("targetMarket", "Target Market"),
+      s("contentRefs", "Posted In (Content Refs)"),
+      s("notes", "Notes"),
+    ],
+  },
+  p5References: {
+    key: "p5References",
+    table: "p5_references",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("source", "Source"),
+      s("url", "URL"),
+      s("note", "Why It Aligns"),
+      s("philosophyId", "Philosophy Ref"),
+      s("philosophyLabel", "Philosophy"),
+    ],
+  },
+  p5SayNo: {
+    key: "p5SayNo",
+    table: "p5_say_no",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("item", "Attracted To"),
+      s("reason", "Why It Doesn't Align"),
+      s("status", "Status"),
+    ],
+  },
+  p5Differentiators: {
+    key: "p5Differentiators",
+    table: "p5_differentiators",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("point", "Differentiator"),
+      s("expectedNorms", "Expected Norms"),
+      s("opposite", "The Opposite I'm Doing"),
+      s("why", "Why I'm Doing This"),
+    ],
+  },
+  personas: {
+    key: "personas",
+    table: "personas",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("name", "Persona"),
+      s("description", "Description"),
+      s("notes", "Notes"),
+    ],
+  },
+  p6Connections: {
+    key: "p6Connections",
+    table: "p6_connections",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("offerAId", "Offer A Ref"),
+      s("offerAName", "Offer A"),
+      s("offerBType", "Connects To Type"),
+      s("offerBId", "Connects To Ref"),
+      s("offerBName", "Connects To"),
+      s("personaRefs", "Personas"),
+      s("howTheyConnect", "How They Connect"),
+      s("worksTogether", "Works Together?"),
+      s("valueNote", "Value To Persona"),
+    ],
+  },
+  p6Giveaways: {
+    key: "p6Giveaways",
+    table: "p6_giveaways",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("contentId", "Content Ref"),
+      s("contentTitle", "Content"),
+      s("howGiving", "How I'm Giving It Away"),
+      s("buildToAsk", "How It Builds To My Ask"),
+    ],
+  },
+  p6Offers: {
+    key: "p6Offers",
+    table: "p6_offers",
+    columns: [
+      s("id", "ID"),
+      s("date", "Date"),
+      s("name", "Offer Name"),
+      s("linkedOfferId", "Linked Offer Ref"),
+      s("linkedOfferName", "Linked Offer"),
+      s("linkedContentId", "Linked Content Ref"),
+      s("linkedContentTitle", "Linked Content"),
+      s("size", "Size"),
+      s("stage", "Stage"),
+      s("classification", "Classification"),
+      s("personaRefs", "Personas"),
       s("notes", "Notes"),
     ],
   },

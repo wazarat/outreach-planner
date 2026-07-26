@@ -14,6 +14,14 @@ export const PRINCIPLE_SECTIONS = {
   signals: "p3Signals",
   positioning: "p3Positioning",
   champions: "p4Champions",
+  philosophies: "p5Philosophies",
+  references: "p5References",
+  "rules-say-no": "p5SayNo",
+  differentiators: "p5Differentiators",
+  personas: "personas",
+  connections: "p6Connections",
+  giveaways: "p6Giveaways",
+  "ecosystem-offers": "p6Offers",
 } as const satisfies Record<string, ModuleKey>;
 
 export type PrincipleSection = keyof typeof PRINCIPLE_SECTIONS;
@@ -55,8 +63,20 @@ export const PRINCIPLES: PrincipleMeta[] = [
     tagline: "Create the conditions that make people feel positive about buying.",
     implemented: true,
   },
-  { number: 5, slug: "5", title: "Principle 5", tagline: "Coming in the next iteration.", implemented: false },
-  { number: 6, slug: "6", title: "Principle 6", tagline: "Coming in the next iteration.", implemented: false },
+  {
+    number: 5,
+    slug: "5",
+    title: "Set Rules",
+    tagline: "Build something contrarian and unique — and have the courage to say no.",
+    implemented: true,
+  },
+  {
+    number: 6,
+    slug: "6",
+    title: "Ecosystem Building",
+    tagline: "Connect every offer and idea into one ecosystem that serves my personas.",
+    implemented: true,
+  },
   { number: 7, slug: "7", title: "Principle 7", tagline: "Coming in the next iteration.", implemented: false },
   { number: 8, slug: "8", title: "Principle 8", tagline: "Coming in the next iteration.", implemented: false },
 ];
