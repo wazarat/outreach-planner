@@ -64,6 +64,8 @@ export async function POST() {
           potentialValue: "",
           notes: "",
           syncedAt,
+          personaId: "",
+          personaName: "",
         });
       }
     }

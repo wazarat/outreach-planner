@@ -49,6 +49,12 @@ const s = (key: string, header: string): ColumnDef => ({ key, header, type: "str
 const b = (key: string, header: string): ColumnDef => ({ key, header, type: "boolean" });
 const n = (key: string, header: string): ColumnDef => ({ key, header, type: "number" });
 
+/** Soft reference to a canonical persona, shared by every linkable module. */
+const personaRefColumns = (): ColumnDef[] => [
+  s("personaId", "Persona Ref"),
+  s("personaName", "Persona"),
+];
+
 function outreachColumns(sourceHeader: string, easyHeader: string): ColumnDef[] {
   return [
     s("id", "ID"),
@@ -66,6 +72,7 @@ function outreachColumns(sourceHeader: string, easyHeader: string): ColumnDef[] 
     b("easy", easyHeader),
     b("value", "Overwhelming Value?"),
     s("notes", "Notes"),
+    ...personaRefColumns(),
   ];
 }
 
@@ -95,6 +102,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       s("giveTake", "Give or Take"),
       s("url", "Post URL"),
       s("notes", "Notes"),
+      ...personaRefColumns(),
     ],
   },
   offers: {
@@ -112,6 +120,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       n("sacrifice", "Sacrifice (1-10)"),
       n("valueScore", "Value Score"),
       s("notes", "Notes"),
+      ...personaRefColumns(),
     ],
   },
   leads: {
@@ -128,6 +137,7 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       s("potentialValue", "Potential Value"),
       s("notes", "Notes"),
       s("syncedAt", "Synced At"),
+      ...personaRefColumns(),
     ],
   },
   p1People: {
@@ -299,6 +309,18 @@ export const MODULES: Record<ModuleKey, ModuleConfig> = {
       s("name", "Persona"),
       s("description", "Description"),
       s("notes", "Notes"),
+      s("pain", "Massive Pain"),
+      b("painHypothesis", "Pain: Hypothesis"),
+      b("painValidated", "Pain: Validated"),
+      s("purchasingPower", "Purchasing Power"),
+      b("powerHypothesis", "Power: Hypothesis"),
+      b("powerValidated", "Power: Validated"),
+      s("easyToTarget", "Easy To Target"),
+      b("targetHypothesis", "Target: Hypothesis"),
+      b("targetValidated", "Target: Validated"),
+      s("growing", "Growing Market"),
+      b("growthHypothesis", "Growing: Hypothesis"),
+      b("growthValidated", "Growing: Validated"),
     ],
   },
   p6Connections: {

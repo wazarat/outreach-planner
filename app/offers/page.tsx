@@ -5,6 +5,7 @@ import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import Modal from "@/components/Modal";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import PersonaLink from "@/components/PersonaLink";
 import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
@@ -232,6 +233,7 @@ export default function OffersPage() {
             <tr>
               <th className="th">Offer</th>
               <th className="th">Made to</th>
+              <th className="th">Persona</th>
               <th className="th">Date</th>
               <th className="th">Dream</th>
               <th className="th">Likelihood</th>
@@ -245,13 +247,13 @@ export default function OffersPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={10}>
+                <td className="td py-10 text-center text-slate-500" colSpan={11}>
                   Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={10}>
+                <td className="td py-10 text-center text-slate-500" colSpan={11}>
                   No offers logged yet. Hit “Log offer” to add your first one.
                 </td>
               </tr>
@@ -263,6 +265,18 @@ export default function OffersPage() {
                     {row.notes ? <p className="text-xs text-slate-500">{row.notes}</p> : null}
                   </td>
                   <td className="td">{row.madeTo || "—"}</td>
+                  <td className="td">
+                    <PersonaLink
+                      personaId={row.personaId}
+                      personaName={row.personaName}
+                      onChange={(persona) =>
+                        patchRow(row.id, {
+                          personaId: persona?.id ?? "",
+                          personaName: persona?.name ?? "",
+                        })
+                      }
+                    />
+                  </td>
                   <td className="td whitespace-nowrap text-xs text-slate-500">{row.date}</td>
                   <td className="td text-accent">{row.dreamOutcome}</td>
                   <td className="td text-accent">{row.likelihood}</td>

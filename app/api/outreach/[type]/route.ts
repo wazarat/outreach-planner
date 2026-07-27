@@ -45,6 +45,8 @@ export async function POST(req: NextRequest, { params }: { params: { type: strin
       easy: Boolean(body.easy),
       value: Boolean(body.value),
       notes: body.notes ?? "",
+      personaId: body.personaId ?? "",
+      personaName: body.personaName ?? "",
     };
     await appendRow(type, record);
     return NextResponse.json({ row: record });

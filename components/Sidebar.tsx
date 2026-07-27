@@ -11,10 +11,12 @@ import {
   Gem,
   Users,
   Compass,
+  Target,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/market", label: "Market System", icon: Target },
   { href: "/cold", label: "Cold Outreach", icon: Snowflake },
   { href: "/warm", label: "Warm Outreach", icon: Flame },
   { href: "/content", label: "Content", icon: PenSquare },

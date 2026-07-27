@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
       ...scores,
       valueScore: computeValueScore(scores),
       notes: body.notes ?? "",
+      personaId: body.personaId ?? "",
+      personaName: body.personaName ?? "",
     };
     await appendRow("offers", record);
     return NextResponse.json({ row: record });

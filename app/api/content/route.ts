@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
       giveTake: body.giveTake || "Give",
       url: body.url ?? "",
       notes: body.notes ?? "",
+      personaId: body.personaId ?? "",
+      personaName: body.personaName ?? "",
     };
     await appendRow("content", record);
     return NextResponse.json({ row: record });

@@ -16,6 +16,8 @@ export interface OutreachRecord {
   easy: boolean;
   value: boolean;
   notes: string;
+  personaId: string;
+  personaName: string;
 }
 
 export interface ContentRecord {
@@ -30,6 +32,8 @@ export interface ContentRecord {
   giveTake: string;
   url: string;
   notes: string;
+  personaId: string;
+  personaName: string;
 }
 
 export interface OfferRecord {
@@ -44,6 +48,8 @@ export interface OfferRecord {
   sacrifice: number;
   valueScore: number;
   notes: string;
+  personaId: string;
+  personaName: string;
 }
 
 export interface LeadRecord {
@@ -57,6 +63,8 @@ export interface LeadRecord {
   potentialValue: string;
   notes: string;
   syncedAt: string;
+  personaId: string;
+  personaName: string;
 }
 
 // ---- Principles (1-4) ----
@@ -228,7 +236,64 @@ export interface PersonaRecord {
   name: string;
   description: string;
   notes: string;
+  pain: string;
+  painHypothesis: boolean;
+  painValidated: boolean;
+  purchasingPower: string;
+  powerHypothesis: boolean;
+  powerValidated: boolean;
+  easyToTarget: string;
+  targetHypothesis: boolean;
+  targetValidated: boolean;
+  growing: string;
+  growthHypothesis: boolean;
+  growthValidated: boolean;
 }
+
+/** The four new-market indicators every persona is scored against. */
+export interface MarketIndicatorDef {
+  key: "pain" | "purchasingPower" | "easyToTarget" | "growing";
+  hypothesisKey: "painHypothesis" | "powerHypothesis" | "targetHypothesis" | "growthHypothesis";
+  validatedKey: "painValidated" | "powerValidated" | "targetValidated" | "growthValidated";
+  label: string;
+  shortLabel: string;
+  hint: string;
+}
+
+export const MARKET_INDICATORS: readonly MarketIndicatorDef[] = [
+  {
+    key: "pain",
+    hypothesisKey: "painHypothesis",
+    validatedKey: "painValidated",
+    label: "Massive Pain",
+    shortLabel: "Pain",
+    hint: "The pain is the pitch — what hurts so much they'll act?",
+  },
+  {
+    key: "purchasingPower",
+    hypothesisKey: "powerHypothesis",
+    validatedKey: "powerValidated",
+    label: "Purchasing Power",
+    shortLabel: "Power",
+    hint: "The targeted customer must have access to funds.",
+  },
+  {
+    key: "easyToTarget",
+    hypothesisKey: "targetHypothesis",
+    validatedKey: "targetValidated",
+    label: "Easy to Target",
+    shortLabel: "Target",
+    hint: "A place where they can be found.",
+  },
+  {
+    key: "growing",
+    hypothesisKey: "growthHypothesis",
+    validatedKey: "growthValidated",
+    label: "Growing",
+    shortLabel: "Growing",
+    hint: "The market must be growing to provide a tailwind.",
+  },
+] as const;
 
 /** P6 — a connection between two offers (or an offer and content) for personas. */
 export interface EcosystemConnectionRecord {

@@ -6,6 +6,7 @@ import { Plus, ExternalLink } from "lucide-react";
 import Modal from "@/components/Modal";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import PersonaLink from "@/components/PersonaLink";
 import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
@@ -237,6 +238,16 @@ export default function ContentPage() {
                   {row.giveTake}
                 </span>
                 <StatusBadge status={row.status} />
+                <PersonaLink
+                  personaId={row.personaId}
+                  personaName={row.personaName}
+                  onChange={(persona) =>
+                    patchRow(row.id, {
+                      personaId: persona?.id ?? "",
+                      personaName: persona?.name ?? "",
+                    })
+                  }
+                />
                 <span className="ml-auto text-xs text-slate-500">{row.date}</span>
                 <RowActions onEdit={() => openEdit(row)} onDelete={() => deleteRow(row.id)} />
               </div>

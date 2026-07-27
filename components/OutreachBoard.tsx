@@ -6,6 +6,7 @@ import { Plus, Repeat } from "lucide-react";
 import Modal from "./Modal";
 import MetricCard from "./MetricCard";
 import PageHeader from "./PageHeader";
+import PersonaLink from "./PersonaLink";
 import RowActions from "./RowActions";
 import SetupNotice from "./SetupNotice";
 import { computeOutreachMetrics } from "@/lib/metrics";
@@ -253,6 +254,7 @@ export default function OutreachBoard({
             <tr>
               <th className="th">Contact</th>
               <th className="th">{sourceLabel}</th>
+              <th className="th">Persona</th>
               <th className="th">Method</th>
               <th className="th">Checklist</th>
               <th className="th">Status</th>
@@ -265,13 +267,13 @@ export default function OutreachBoard({
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={9}>
+                <td className="td py-10 text-center text-slate-500" colSpan={10}>
                   Loading…
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={9}>
+                <td className="td py-10 text-center text-slate-500" colSpan={10}>
                   No outreach logged yet. Hit “Log outreach” to add your first one.
                 </td>
               </tr>
@@ -285,6 +287,18 @@ export default function OutreachBoard({
                     </p>
                   </td>
                   <td className="td max-w-[180px]">{row.source || "—"}</td>
+                  <td className="td">
+                    <PersonaLink
+                      personaId={row.personaId}
+                      personaName={row.personaName}
+                      onChange={(persona) =>
+                        patchRow(row.id, {
+                          personaId: persona?.id ?? "",
+                          personaName: persona?.name ?? "",
+                        })
+                      }
+                    />
+                  </td>
                   <td className="td">{row.method || "—"}</td>
                   <td className="td">
                     <div className="flex flex-wrap gap-1.5">

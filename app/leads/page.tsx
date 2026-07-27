@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import PageHeader from "@/components/PageHeader";
+import PersonaLink from "@/components/PersonaLink";
 import RowActions from "@/components/RowActions";
 import SetupNotice from "@/components/SetupNotice";
 import StatusBadge from "@/components/StatusBadge";
@@ -193,6 +194,7 @@ export default function LeadsPage() {
             <tr>
               <th className="th">Lead</th>
               <th className="th">Campaign</th>
+              <th className="th">Persona</th>
               <th className="th">Status</th>
               <th className="th">Came in for</th>
               <th className="th">Potential value</th>
@@ -203,13 +205,13 @@ export default function LeadsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={7}>
+                <td className="td py-10 text-center text-slate-500" colSpan={8}>
                   Loading…
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td className="td py-10 text-center text-slate-500" colSpan={7}>
+                <td className="td py-10 text-center text-slate-500" colSpan={8}>
                   No leads yet. Hit “Sync from Instantly” to pull your campaigns in.
                 </td>
               </tr>
@@ -223,6 +225,18 @@ export default function LeadsPage() {
                     </p>
                   </td>
                   <td className="td max-w-[160px] text-xs">{row.campaign || "—"}</td>
+                  <td className="td">
+                    <PersonaLink
+                      personaId={row.personaId}
+                      personaName={row.personaName}
+                      onChange={(persona) =>
+                        patchRow(row.id, {
+                          personaId: persona?.id ?? "",
+                          personaName: persona?.name ?? "",
+                        })
+                      }
+                    />
+                  </td>
                   <td className="td">
                     <StatusBadge status={row.status} />
                   </td>

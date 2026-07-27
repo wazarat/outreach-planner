@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Boxes, Gift, Link2, Plus, Users, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Boxes, Gift, Link2, Plus, Users, X } from "lucide-react";
 import ContentPicker, { contentTitle } from "@/components/ContentPicker";
+import { IndicatorScorecard } from "@/components/MarketIndicators";
 import Modal from "@/components/Modal";
 import OfferPicker, { offerTitle } from "@/components/OfferPicker";
 import PrincipleHeader from "@/components/PrincipleHeader";
@@ -383,7 +385,12 @@ export default function PrincipleSixPage() {
           <h2 className="text-lg font-semibold text-white">Target Customer Personas</h2>
           <p className="text-sm text-slate-400">
             The people every offer and plan should serve. These personas persist across your
-            connections and offers below.
+            connections and offers below — score them against the four new-market indicators in
+            the{" "}
+            <Link href="/market" className="text-accent hover:underline">
+              Market System
+            </Link>
+            .
           </p>
         </div>
 
@@ -458,7 +465,16 @@ export default function PrincipleSixPage() {
                     onDelete={() => personas.remove(row.id)}
                   />
                 </div>
-                <p className="text-sm text-slate-400">{row.description || "—"}</p>
+                <p className="mb-3 text-sm text-slate-400">{row.description || "—"}</p>
+                <div className="mb-2 rounded-lg border border-ink-700 bg-ink-850 p-3">
+                  <IndicatorScorecard persona={row} />
+                </div>
+                <Link
+                  href={`/market/${row.id}`}
+                  className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
+                >
+                  Open in Market System <ArrowRight size={12} />
+                </Link>
               </div>
             ))}
           </div>
